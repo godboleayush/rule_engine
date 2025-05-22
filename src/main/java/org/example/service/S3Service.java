@@ -28,16 +28,16 @@ public class S3Service {
     public S3Service() {
 //        String accessKey = System.getenv("AWS_ACCESS_KEY_ID");
 //        String secretKey = System.getenv("AWS_SECRET_ACCESS_KEY");
-        String region = System.getenv("AWS_REGION");
+        String region = "ayush2604";
 
         // If any credential is missing, throw an exception
 //        if (accessKey == null || secretKey == null || region == null) {
 //            throw new IllegalArgumentException("AWS credentials not set correctly in environment variables.");
 //        }
 
-        if (region == null) {
-            throw new IllegalArgumentException("AWS credentials not set correctly in environment variables.");
-        }
+//        if (region == null) {
+//            throw new IllegalArgumentException("AWS credentials not set correctly in environment variables.");
+//        }
 
 //        System.out.println("AWS Access Key: " + accessKey);
 //        System.out.println("AWS Region: " + region);
