@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
+        JAVA_HOME = '/usr/lib/jvm/java-21'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
