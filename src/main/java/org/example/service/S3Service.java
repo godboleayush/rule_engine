@@ -39,8 +39,7 @@ public class S3Service {
 //            throw new IllegalArgumentException("AWS credentials not set correctly in environment variables.");
 //        }
 
-//        System.out.println("AWS Access Key: " + accessKey);
-//        System.out.println("AWS Region: " + region);
+
 
 //        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
 
