@@ -28,7 +28,7 @@ public class S3Service {
     public S3Service() {
 //        String accessKey = System.getenv("AWS_ACCESS_KEY_ID");
 //        String secretKey = System.getenv("AWS_SECRET_ACCESS_KEY");
-        String region = "ayush2604";
+        String region = "ap-south-1";
 
         // If any credential is missing, throw an exception
 //        if (accessKey == null || secretKey == null || region == null) {
