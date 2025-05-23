@@ -5,7 +5,7 @@ provider "aws" {
 
 # IAM Role for Lambda Execution
 resource "aws_iam_role" "lambda_exec" {
-  name = "springboot_lambda_exec_v2"
+  name = "springboot_lambda_exec_v3"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
