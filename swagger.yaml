@@ -1,0 +1,244 @@
+openapi: 3.0.1
+info:
+  title: Ping Controller API
+  description: API for pinging server, uploading JSON to S3, and evaluating rule logic.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /ping:
+    get:
+      summary: Ping the server
+      description: Returns a "Hello, World!" message.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pong:
+                    type: string
+                    example: Hello, World!
+
+  /:
+    get:
+      summary: Test endpoint
+      description: Returns a basic message for testing server.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Sab sahi
+
+  /upload:
+    post:
+      summary: Upload configuration JSON
+      description: Uploads a detailed strategy configuration JSON object to S3.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                configurationName:
+                  type: string
+                instanceRevision:
+                  type: integer
+                instanceId:
+                  type: string
+                instanceName:
+                  type: string
+                state:
+                  type: string
+                configurationPropertiesValues:
+                  type: object
+                  properties:
+                    strategyId:
+                      type: string
+                    versionName:
+                      type: string
+                    versionNumber:
+                      type: string
+                    description:
+                      type: string
+                    defaultResponse:
+                      type: object
+                      properties:
+                        action:
+                          type: string
+                    data:
+                      type: object
+                    decisions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          DecisionId:
+                            type: integer
+                          description:
+                            type: string
+                          ruleSets:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                description:
+                                  type: string
+                                rules:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      name:
+                                        type: string
+                                      description:
+                                        type: string
+                                      condition:
+                                        type: object
+                                        properties:
+                                          op:
+                                            type: string
+                                          params:
+                                            type: array
+                                            items:
+                                              oneOf:
+                                                - type: string
+                                                - type: object
+                                      outcome:
+                                        type: object
+                                        properties:
+                                          response:
+                                            type: object
+                                            properties:
+                                              action:
+                                                type: string
+                                          alerts:
+                                            type: array
+                                            items:
+                                              type: object
+                                              properties:
+                                                type:
+                                                  type: string
+                    selectedDataVariables:
+                      type: array
+                      items:
+                        type: string
+                authorMetadata:
+                  type: object
+                  properties:
+                    userId:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                subType:
+                  type: string
+              required:
+                - configurationName
+                - instanceRevision
+                - instanceId
+                - instanceName
+                - state
+                - configurationPropertiesValues
+                - authorMetadata
+                - subType
+      responses:
+        '200':
+          description: JSON content uploaded to S3.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: JSON content uploaded to S3.
+        '500':
+          description: Upload failed
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Upload failed error message
+
+  /evaluate:
+    post:
+      summary: Evaluate rules
+      description: Evaluates input JSON against strategy rules from S3.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - DecisionId
+                - Input
+                - strategyId
+                - versionName
+                - versionNumber
+              properties:
+                strategyId:
+                  type: string
+                  example: fraud-strategy-v4-1.9f4ba024-9ca0-4df8-b5a5-84632743590d
+                versionName:
+                  type: string
+                  example: enrichers
+                versionNumber:
+                  type: string
+                  example: "3"
+                DecisionId:
+                  type: string
+                  example: "1234"
+                Input:
+                  type: object
+                  example:
+                    event_action_FI: initiate
+                    event_sessionId: 48a2eadc
+                    event_action: initiate
+                    event_activityType_FI: payment
+                    data_customer_Segment_idType_xs: Internal
+                    ayush: hi
+                tenantId:
+                  type: string
+                  example: "1111"
+                accounts:
+                  type: string
+                  example: "abcd"
+                oparties:
+                  type: string
+                  example: "pqrs"
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  result: passed
+                  details:
+                    - ruleSet: AgeCheck
+                      passed: true
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Invalid input Missing required field DecisionId
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unexpected error while evaluating decision logic.
