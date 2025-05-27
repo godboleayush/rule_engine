@@ -116,11 +116,22 @@ public class S3Service {
 
     public static String fileNameProvider(JsonNode jsonContent){
         JsonNode conf = jsonContent.get("configurationPropertiesValues");
-        String strategyId = conf.get("strategyId").asText();
-//        System.out.println(strategyId);
-        String versionName = conf.get("versionName").asText();
-        String versionNumber = conf.get("versionNumber").asText();
-        //        System.out.println(fileName);
+        if (conf == null || conf.isMissingNode()) {
+            throw new IllegalArgumentException("Missing 'configurationPropertiesValues' in JSON.");
+        }
+
+        JsonNode strategyIdNode = conf.get("strategyId");
+        JsonNode versionNameNode = conf.get("versionName");
+        JsonNode versionNumberNode = conf.get("versionNumber");
+
+        if (strategyIdNode == null || versionNameNode == null || versionNumberNode == null) {
+            throw new IllegalArgumentException("One or more required fields are missing in 'configurationPropertiesValues' - strategyIdNode , versionName , versionNumber.");
+        }
+
+        String strategyId = strategyIdNode.asText();
+        String versionName = versionNameNode.asText();
+        String versionNumber = versionNumberNode.asText();
+
         return strategyId + "_" + versionName + "_" + versionNumber;
     }
 }

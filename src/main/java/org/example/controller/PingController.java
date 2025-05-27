@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,21 +62,38 @@ public class PingController {
     @PostMapping("/evaluate")
     public ObjectNode everything (@RequestBody JsonNode rootNode){
 
-        Integer decisionId = rootNode.get("DecisionId").asInt();
-
-        Map<String, Object> flatMap = new HashMap<>();
-        JsonNode input = rootNode.get("Input");
-        s3Service.flattenJson(input, "", flatMap);
-
-        String strategyId = rootNode.get("strategyId").asText();
-        String versionName = rootNode.get("versionName").asText();
-        String versionNumber = rootNode.get("versionNumber").asText();
-        String filename = strategyId + "_" + versionName + "_" + versionNumber + ".json";
-
-        String data = s3Service.getJsonString(filename);
-        ObjectMapper objectMapper = new ObjectMapper();
-
         try {
+
+            if (rootNode.get("DecisionId") == null) {
+                throw new IllegalArgumentException("Missing required field: DecisionId");
+            }
+            if (rootNode.get("Input") == null) {
+                throw new IllegalArgumentException("Missing required field: Input");
+            }
+            if (rootNode.get("strategyId") == null) {
+                throw new IllegalArgumentException("Missing required field: strategyId");
+            }
+            if (rootNode.get("versionName") == null) {
+                throw new IllegalArgumentException("Missing required field: versionName");
+            }
+            if (rootNode.get("versionNumber") == null) {
+                throw new IllegalArgumentException("Missing required field: versionNumber");
+            }
+
+            Integer decisionId = rootNode.get("DecisionId").asInt();
+
+            Map<String, Object> flatMap = new HashMap<>();
+            JsonNode input = rootNode.get("Input");
+            s3Service.flattenJson(input, "", flatMap);
+
+            String strategyId = rootNode.get("strategyId").asText();
+            String versionName = rootNode.get("versionName").asText();
+            String versionNumber = rootNode.get("versionNumber").asText();
+            String filename = strategyId + "_" + versionName + "_" + versionNumber + ".json";
+
+            String data = s3Service.getJsonString(filename);
+            ObjectMapper objectMapper = new ObjectMapper();
+
             JsonNode json_data = objectMapper.readTree(data);
             JsonNode configurationPropertiesValues = json_data.get("configurationPropertiesValues");
             JsonNode decisions = configurationPropertiesValues.get("decisions");
@@ -98,8 +116,14 @@ public class PingController {
 
             return resp;
 
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid input: " + e.getMessage(), e);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to parse JSON data: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RuntimeException("IO error while reading JSON or S3 data: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error while evaluating decision logic.", e);
         }
     }
 
